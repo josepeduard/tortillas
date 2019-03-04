@@ -13,11 +13,13 @@
     {{#if currentUser}}
     <div>
       <p>{{currentUser.username}}</p>
-      <form action="/auth/logout" method="POST">Logout</form>
-      <button type="submit">Logout</button>
+      <form action="/auth/logout" method="POST">
+      
+        <button type="submit">Logout</button>
+      </form>
       {{else}}
       <a href="/auth/signup">Signup</a>
-      <a href="/auth/login">Logout</a>
+      <a href="/auth/login">Login</a>
       {{/if}}
       
     </div>
