@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 const User = require('../models/User');
+const { requireAnon, requireUser, requireFields } = require('../middlewares/auth');
 
 const saltRounds = 10;
 
@@ -11,31 +12,29 @@ la proxima peticion que hace el cliente, ya passa la cookie y el servidor sabe q
 en el momento de hacer el login (POST) el cliente manda la cookie + username + password y el servidor comprueba la cookie, y le assigna una session
 guardando la informacion de la cookie, user y passw */
 
-router.get('/signup', (req, res, next) => {
-  // protegemos la ruta para que si ya estas logueado no puedas acceder al signup
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
-  res.render('auth/signup');
+/*
+if (req.session.currentUser) {
+ res.redirect('/');
+ return;
+}
+*/
+
+router.get('/signup', requireAnon, (req, res, next) => {
+  const data = {
+    messages: req.flash('validation')
+  };
+  res.render('auth/signup', data);
 });
 
-router.post('/signup', async (req, res, next) => {
-  // no haria falta, pero siempre lo protegemos todo --> protegemos la ruta para que si ya estas logueado no puedas acceder al signup
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/signup', requireAnon, requireFields, async (req, res, next) => {
   // Extraer body --> Comprovar que username y passw no estan vacios
   const { username, password } = req.body;
-  if (!password || !username) {
-    res.redirect('/auth/signup');
-    return;
-  }
+
   // --> comprovar que el usuario no existe
   try {
     const result = await User.findOne({ username: username });
     if (result) {
+      req.flash('validation', 'This username is taken');
       res.redirect('/auth/signup');
       return;
     }
@@ -55,31 +54,23 @@ router.post('/signup', async (req, res, next) => {
   }
 });
 
-router.get('/login', (req, res, next) => {
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
-  res.render('auth/login');
+router.get('/login', requireAnon, (req, res, next) => {
+  const data = {
+    messages: req.flash('validation')
+  };
+  res.render('auth/login', data);
 });
 
-router.post('/login', async (req, res, next) => {
-  // proteccion si estamos logeados no podemos acceder a login
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/login', requireAnon, requireFields, async (req, res, next) => {
   // Extraer informacion del body
   const { username, password } = req.body;
   // Comprobar que hay usuario y password
-  if (!password || !username) {
-    res.redirect('/auth/login');
-    return;
-  }
+
   // Comprovar que el usuario existe
   try {
     const user = await User.findOne({ username });
     if (!user) {
+      req.flash('validation', 'Username or passsword incorrect');
       res.redirect('/auth/login');
       return;
     }
@@ -90,6 +81,7 @@ router.post('/login', async (req, res, next) => {
       // Redirigir
       res.redirect('/');
     } else {
+      req.flash('validation', 'Username or passsword incorrect');
       res.redirect('/auth/login');
     }
   } catch (error) {
@@ -97,12 +89,9 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post('/logout', (req, res, next) => {
-  if (!req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/logout', requireUser, (req, res, next) => {
   delete req.session.currentUser;
   res.redirect('/');
 });
+
 module.exports = router;

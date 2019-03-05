@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
 const tortillaSchema = new Schema({
   name: {
@@ -14,7 +15,11 @@ const tortillaSchema = new Schema({
   size: {
     type: String,
     enum: ['small', 'medium', 'big']
-  }
+  },
+  creator: {
+    type: ObjectId,
+    ref: 'User' }
+
 });
 
 const Tortilla = mongoose.model('Tortilla', tortillaSchema);

@@ -4,6 +4,9 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 
+const flash = require('connect-flash');
+const hbs = require('hbs');
+
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 
@@ -28,6 +31,7 @@ app.use(session({
 }));
 
 // --
+app.use(flash());
 
 mongoose.connect('mongodb://localhost/tortillaApp', {
   keepAlive: true,
@@ -44,6 +48,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, '/views'));
+hbs.registerPartials(path.join(__dirname, '/views/partials'));
 
 app.use((req, res, next) => {
   app.locals.currentUser = req.session.currentUser;
