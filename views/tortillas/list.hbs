@@ -6,3 +6,19 @@
         <a href="/tortillas/{{this._id}}">{{this.name}}</a>  
     {{/each}}
 </ul>
+
+<a class= "button" href="/new">New tortilla</a>
+
+<form method="GET" id="search-tortilla" action="/api/tortillas">
+
+  <div class="field" >
+    <label>Find by username</label>
+    <input type="text" name="username"/>
+  </div>
+
+  <div class="field submit">
+    <button type="submit">Search</button>
+  </div>
+</form>
+
+<script src="/javascripts/index.js"></script>
